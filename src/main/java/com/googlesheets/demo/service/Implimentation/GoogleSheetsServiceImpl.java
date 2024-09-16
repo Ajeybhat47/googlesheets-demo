@@ -1,10 +1,11 @@
-package com.googlesheets.demo.service;
+package com.googlesheets.demo.service.Implimentation;
 
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.*;
 import com.googlesheets.demo.config.GoogleAuthorizationConfig;
 import com.googlesheets.demo.model.Employee;
 import com.googlesheets.demo.repo.EmployeeRepository;
+import com.googlesheets.demo.service.GoogleSheetsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,27 +138,10 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
         LOGGER.info("Google Sheet updated with employee data from the database.");
     }
 
-    @Override
-    public List<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
-    }
 
-    @Override
-    public Employee getEmployeeById(Long id) {
-        return employeeRepository.findById(id).orElse(null);
-    }
 
-    @Override
-    public String deleteEmployee(Long id) {
-        if (employeeRepository.existsById(id)) {
-            employeeRepository.deleteById(id);
-            deleteRowFromSheet(id);
-            return "Employee deleted successfully!";
-        }
-        return "Employee not found!";
-    }
 
-    private void deleteRowFromSheet(Long employeeId) {
+    void deleteRowFromSheet(Long employeeId) {
         try {
             List<List<Object>> sheetValues = getSheetValues();
             if (sheetValues != null) {
@@ -176,23 +160,9 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
         }
     }
 
-    @Override
-    public String addEmployee(Employee employee) {
-        employee.setLastModifiedTime(LocalDateTime.now().format(FORMATTER));
-        Long lastRowNum = 0L;
-        try {
-            lastRowNum = getLastRowNum();
-        } catch (IOException e) {
-            LOGGER.error("Failed to get the last row number: {}", e.getMessage());
-        }
-        employee.setRowNum(lastRowNum + 1);
-        employeeRepository.save(employee);
 
-        updateGoogleSheetWithEmployee(employee);
-        return "Employee added successfully!";
-    }
 
-    private void updateGoogleSheetWithEmployee(Employee employee) {
+    void updateGoogleSheetWithEmployee(Employee employee) {
         try {
             List<Object> employeeData = Arrays.asList(
                     employee.getId().toString(),
@@ -212,7 +182,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
         }
     }
 
-    private Long getLastRowNum() throws IOException {
+    Long getLastRowNum() throws IOException {
         String range = "Sheet1!A:A";
         ValueRange response = sheetsService.spreadsheets().values().get(spreadsheetId, range).execute();
         List<List<Object>> values = response.getValues();
@@ -234,21 +204,5 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
         return Collections.singletonList("R1C1:R" + row + "C" + col);
     }
 
-    @Override
-    public String updateEmployee(Employee employee) {
-        employee.setLastModifiedTime(LocalDateTime.now().format(FORMATTER));
-        Employee existingEmployee = employeeRepository.findById(employee.getId()).orElse(null);
-        if (existingEmployee == null) {
-            return "Employee not found!";
-        }
 
-        if(employee.getRowNum() == null )
-        {
-            employee.setRowNum(existingEmployee.getRowNum());
-        }
-        employeeRepository.save(employee);
-        updateGoogleSheetWithEmployee(employee);
-
-        return "Employee updated successfully!";
-    }
 }

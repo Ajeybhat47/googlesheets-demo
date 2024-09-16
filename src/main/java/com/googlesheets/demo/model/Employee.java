@@ -1,6 +1,5 @@
 package com.googlesheets.demo.model;
 
-
 import javax.persistence.*;
 
 @Entity
@@ -11,21 +10,35 @@ public class Employee {
 
     @Column
     private String name;
+
     @Column
     private int age;
+
     @Column
     private String city;
+
     @Column
     private double salary;
+
     @Column
     private String lastModifiedTime;
 
-
+    @Column(name = "row_num") // Renamed from rowNumber to row_num
+    private Long rowNum;
 
     // Constructors, getters, setters, and toString() method
 
-
     public Employee() {}
+
+    public Employee(Long id, String name, int age, String city, double salary, String lastModifiedTime, Long rowNum) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+        this.city = city;
+        this.salary = salary;
+        this.lastModifiedTime = lastModifiedTime;
+        this.rowNum = rowNum;
+    }
 
     public Long getId() {
         return id;
@@ -75,15 +88,11 @@ public class Employee {
         this.lastModifiedTime = lastModifiedTime;
     }
 
-    public Employee(Long id, String name, int age, String city, double salary, String lastModifiedTime) {
-        this.id = id;
-        this.name = name;
-        this.age = age;
-        this.city = city;
-        this.salary = salary;
-        this.lastModifiedTime = lastModifiedTime;
+    public Long getRowNum() {
+        return rowNum;
     }
 
-
-    // Getters and setters omitted for brevity
+    public void setRowNum(Long rowNum) {
+        this.rowNum = rowNum;
+    }
 }

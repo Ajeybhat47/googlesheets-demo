@@ -1,7 +1,11 @@
 package com.googlesheets.demo.service;
 
+import org.springframework.stereotype.Service;
+
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+
+
 
 public interface GoogleSheetsService {
 
